@@ -5,6 +5,7 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import org.jetbrains.annotations.Contract;
 
 import java.awt.*;
 
@@ -19,19 +20,22 @@ public record City(String name, Map<CandyType, Integer> candyPrices, Point coord
     );
   }
 
+  @Contract(pure = true)
   public City withCandyPrices(Map<CandyType, Integer> candyPrices) {
     return new City(name, candyPrices, coordinates, baseTicketPrice);
   }
 
+  @Contract(pure = true)
   private double distanceTo(City city) {
-    System.out.println(coordinates.distance(city.coordinates));
     return coordinates.distance(city.coordinates);
   }
 
+  @Contract(pure = true)
   public int priceTo(City city, double scalar) {
     return (int) Math.round((distanceTo(city)) * baseTicketPrice * scalar);
   }
 
+  @Contract(pure = true)
   public City withScaledCandyPrices(Map<CandyType, Double> scalars) {
     return withCandyPrices(
         List.of(CandyType.values()).toMap(type ->
