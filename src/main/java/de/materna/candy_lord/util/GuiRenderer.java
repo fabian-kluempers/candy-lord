@@ -25,10 +25,10 @@ public class GuiRenderer {
         | Marshmallow             |       2 |       31.29€ | Berlin               123.42€ |
         | Lemonade                |       1 |        5.04€ | etc                          |
         | Cake                  |      22 |        0.45€ |                              |
-        +-----------------------+---------+--------------+------------------------------+
-        | buy candy      : b candy-name amount                                           |
-        | sell candy     : s candy-name amount                                           |
-        | travel to city : t city-name                                                   |
+        +-----------------------+--------+--------------+---------------------------------+
+        | buy candy      : b candy-name amount                                            |
+        | sell candy     : s candy-name amount                                            |
+        | travel to city : t city-name                                                    |
         | undo turn      : undo                                                           |
         +---------------------------------------------------------------------------------+
         """;
@@ -48,11 +48,12 @@ public class GuiRenderer {
         .toList()
         .sortBy(Tuple2::_2)
         .reverse()
+        .map(tuple -> tuple.map2(EuroRepresentation::of))
         .map(tuple -> String.format(
             ticketTrFormat,
             tuple._1,
-            centToEuro(tuple._2)._1,
-            centToEuro(tuple._2)._2
+            tuple._2.euro,
+            tuple._2.cent
         ));
 
     var candyTable = List.of(CandyType.values()).map((type) ->
@@ -63,12 +64,13 @@ public class GuiRenderer {
             )
         )
         .sortBy(tuple -> -tuple._1.name().length()) // descending (notice -length)
+        .map(tuple -> tuple.map3(EuroRepresentation::of))
         .map(tuple -> String.format(
             candyTrFormat,
             tuple._1,
             tuple._2,
-            centToEuro(tuple._3)._1,
-            centToEuro(tuple._3)._2
+            tuple._3.euro,
+            tuple._3.cent
         ));
 
     var maxTableSize = Math.max(ticketPriceTable.length(), candyTable.length());
@@ -81,6 +83,13 @@ public class GuiRenderer {
 
     var table = candyTable.zipWith(ticketPriceTable, (left, right) -> left + "|" + right);
 
+    String legend = """
+        | buy candy      : b candy-name amount                                             |
+        | sell candy     : s candy-name amount                                             |
+        | travel to city : t city-name                                                     |
+        | undo turn      : undo                                                            |
+        +----------------------------------------------------------------------------------+
+        """;
 
     List<String> lines = List
         .of("+----------------------------------------------------------------------------------+")
@@ -91,12 +100,27 @@ public class GuiRenderer {
         .append("| Candies              | On Hand | Street Price | Ticket Prices                    |")
         .append("+----------------------+---------+--------------+----------------------------------+")
         .appendAll(table)
-        .append("+----------------------+---------+--------------+----------------------------------+");
-    return lines.foldLeft("", (acc, elem) -> acc + "\n" + elem);
+        .append("+----------------------+---------+--------------+----------------------------------+")
+        .append(legend);
+    return lines.reduce((acc, elem) -> acc + "\n" + elem);
 
   }
 
   private static Tuple2<Integer, Integer> centToEuro(int cent) {
     return new Tuple2<>(cent / 100, Math.abs(cent % 100));
+  }
+
+  static class EuroRepresentation {
+    public final int euro;
+    public final int cent;
+
+    private EuroRepresentation(int euro, int cent) {
+      this.euro = euro;
+      this.cent = cent;
+    }
+
+    public static EuroRepresentation of(int cent) {
+      return new EuroRepresentation(cent / 100, Math.abs(cent % 100));
+    }
   }
 }

@@ -16,13 +16,21 @@ public class IOController {
 
   public String parse(String input) {
     var args = input.split(" ", 2);
-    var trimmed = new Tuple2<>(args[0].trim(), args[1].trim());
+    var trimmed = new Tuple2<>(args[0].trim(), Try.of(() -> args[1].trim()));
     return switch (trimmed._1) {
-      case "t" -> travel(trimmed._2);
-      case "s" -> sell(trimmed._2);
-      case "b" -> buy(trimmed._2);
+      case "t" -> travel(trimmed._2.get());
+      case "s" -> sell(trimmed._2.get());
+      case "b" -> buy(trimmed._2.get());
+      case "undo" -> undo();
       default -> malformedCommand();
     };
+  }
+
+  private String undo() {
+    return game
+        .undo()
+        .map(GuiRenderer::render)
+        .getOrElse("You can't undo right now!");
   }
 
   private String buy(String input) {

@@ -34,7 +34,6 @@ public class GameController implements GameAPI {
   private static final Random rng = new Random();
 
   @Override public Either<String, StateDTO> visitCity(String city) {
-    System.out.println(history);
     if (state().player().city().name().equals(city)) return Either.left("You are already in " + city + ".");
     else return cities
         .get(city)
@@ -58,8 +57,8 @@ public class GameController implements GameAPI {
   }
 
   @Override public Option<StateDTO> undo() {
-    return history
-        .tailOption()
+    return Option.of(history.tail())
+        .filterNot(List::isEmpty)
         .peek(tail -> history = tail)
         .map(List::head)
         .map(StateMapper::map);

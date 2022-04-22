@@ -1,11 +1,8 @@
 package de.materna.candy_lord.application;
 
 import de.materna.candy_lord.api.GameAPI;
-import de.materna.candy_lord.control.GameController;
 import de.materna.candy_lord.control.IOController;
 import de.materna.candy_lord.util.GuiRenderer;
-
-import java.util.Locale;
 import java.util.Scanner;
 
 public class Application {
@@ -20,5 +17,4 @@ public class Application {
       System.out.println(io.parse(input));
     }
   }
-
 }
