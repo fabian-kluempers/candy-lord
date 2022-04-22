@@ -1,27 +1,22 @@
 package de.materna.candy_lord.application;
 
-import de.materna.candy_lord.domain.City;
-import de.materna.candy_lord.domain.Player;
-import de.materna.candy_lord.logic.Game;
-import de.materna.candy_lord.logic.IOController;
+import de.materna.candy_lord.api.GameAPI;
+import de.materna.candy_lord.control.GameController;
+import de.materna.candy_lord.control.IOController;
 import de.materna.candy_lord.util.GuiRenderer;
-import io.vavr.Tuple2;
-import io.vavr.collection.List;
-import io.vavr.collection.Map;
 
-import java.awt.*;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class Application {
-
-
   public static void main(String[] args) {
-    Game game = new Game();
+    GameAPI game = GameAPI.create();
     IOController io = new IOController(game);
     Scanner scanner = new Scanner(System.in);
-    System.out.println(GuiRenderer.render(game.getPlayer(), game.getTicketPrices()));
+    System.out.println(GuiRenderer.render(game.newGame()));
     while (true) {
       String input = scanner.nextLine();
+      if (input.trim().equalsIgnoreCase("stop")) break;
       System.out.println(io.parse(input));
     }
   }

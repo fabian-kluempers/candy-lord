@@ -1,18 +1,18 @@
 package de.materna.candy_lord.util;
 
 import de.materna.candy_lord.domain.CandyType;
-import de.materna.candy_lord.domain.Player;
+import de.materna.candy_lord.dto.CityDTO;
+import de.materna.candy_lord.dto.PlayerDTO;
+import de.materna.candy_lord.dto.StateDTO;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import io.vavr.collection.List;
-import io.vavr.collection.Map;
 
 public class GuiRenderer {
-  public static String render(Player player, Map<String, Integer> ticketPrices, String customMessage) {
-    return render(player, ticketPrices) + "\n" + customMessage;
-  }
-
-  public static String render(Player player, Map<String, Integer> ticketPrices) {
+  public static String render(StateDTO state) {
+    //TODO custom message
+    PlayerDTO player = state.player();
+    CityDTO city = state.city();
     String s = """
         +----------------------------------------------------------------------------------+
         |                                   Candy Lord                                     |
@@ -37,14 +37,14 @@ public class GuiRenderer {
 
     String header = String.format(
         "| City: %20s            Maximum Capacity: %6d, Cash: %6d.%2d€ |",
-        player.city().name(), player.maxCapacity(), cash._1, cash._2
+        city.name(), player.maxCapacity(), cash._1, cash._2
     );
 
     String candyTrFormat = "| %-20s | %7d | %8d.%2d€ ";
     String ticketTrFormat = " %-20s: %6d.%2d€ |";
-    var candyPrices = player.city().candyPrices();
+    var candyPrices = city.candyPrices();
 
-    var ticketPriceTable = ticketPrices
+    var ticketPriceTable = state.ticketPrices()
         .toList()
         .sortBy(Tuple2::_2)
         .reverse()
