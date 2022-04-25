@@ -8,6 +8,7 @@ import io.vavr.collection.Map;
 import org.jetbrains.annotations.Contract;
 
 import java.awt.*;
+import java.util.Random;
 
 public record City(String name, Map<CandyType, Integer> candyPrices, Point coordinates, int baseTicketPrice) {
   public City(String name, Point coordinates, int baseTicketPrice, int candyBasePriceScalar) {
@@ -43,11 +44,11 @@ public record City(String name, Map<CandyType, Integer> candyPrices, Point coord
         ));
   }
 
-  public City withScaledCandyPrices() {
-    return withScaledCandyPrices(generateRandomScalars());
+  public City withScaledCandyPrices(Random rng) {
+    return withScaledCandyPrices(generateRandomScalars(rng));
   }
 
-  public static Map<CandyType, Double> generateRandomScalars() {
-    return List.of(CandyType.values()).toMap((x) -> new Tuple2<>(x, Math.random() * 0.4 + 1));
+  public static Map<CandyType, Double> generateRandomScalars(Random rng) {
+    return List.of(CandyType.values()).toMap((x) -> new Tuple2<>(x, rng.nextDouble() * 0.4 + 1));
   }
 }

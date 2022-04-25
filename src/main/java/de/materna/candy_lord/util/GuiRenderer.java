@@ -14,32 +14,12 @@ public class GuiRenderer {
   public static String render(StateDTO state, Map<CandyType, Integer> candyIndices, Map<String, Integer> cityIndices) {
     PlayerDTO player = state.player();
     CityDTO city = state.city();
-    // template
-    String s = """
-        +----------------------------------------------------------------------------------+
-        |                                   Candy Lord                                     |
-        +----------------------------------------------------------------------------------+
-        | City: aaaabbbbccccddddeeee                  maximum capacity: 120, cash: 613.13€ |
-        +----------------------+---------+--------------+----------------------------------+
-        | Candies              | On Hand | Street Price | Ticket Prices                    |
-        +----------------------+---------+--------------+----------------------------------+
-        | aaaabbbbccccddddeeee | aaabbbb | eeeeeeee.cc€ | aaaabbbbccccddddeeee: eeeeee.cc€ |
-        | Marshmallow             |       2 |       31.29€ | Berlin               123.42€ |
-        | Lemonade                |       1 |        5.04€ | etc                          |
-        | Cake                  |      22 |        0.45€ |                              |
-        +-----------------------+--------+--------------+---------------------------------+
-        | buy candy      : b candy-name amount                                            |
-        | sell candy     : s candy-name amount                                            |
-        | travel to city : t city-name                                                    |
-        | undo turn      : undo                                                           |
-        +---------------------------------------------------------------------------------+
-        """;
 
-    Tuple2<Integer, Integer> cash = centToEuro(player.cash());
+    EuroRepresentation cash = EuroRepresentation.of(player.cash());
 
     String header = String.format(
         "| City: %-20s   Day: %2d, Maximum Capacity: %6d, Cash: %6d.%02d€ |",
-        city.name(), state.day(), player.maxCapacity(), cash._1, cash._2
+        city.name(), state.day(), player.maxCapacity(), cash.euro, cash.cent
     );
 
     String candyTrFormat = "| [%d] %-16s | %7d | %8d.%02d€ ";
@@ -79,9 +59,9 @@ public class GuiRenderer {
     var maxTableSize = Math.max(ticketPriceTable.length(), candyTable.length());
 
     //make tables same size
-    var paddingElement = String.format(candyTrFormat, null, null, null, null, null);
+    var paddingElement = String.format(candyTrFormat, new Object[5]);
     candyTable.padTo(maxTableSize, paddingElement);
-    paddingElement = String.format(ticketTrFormat, null, null, null, null);
+    paddingElement = String.format(ticketTrFormat, new Object[4]);
     ticketPriceTable.padTo(maxTableSize, paddingElement);
 
     var table = candyTable.zipWith(ticketPriceTable, (left, right) -> left + "|" + right);
@@ -111,7 +91,7 @@ public class GuiRenderer {
     if (state.message().isDefined()) {
       String message = state.message().get();
       String padding = Try.of(() -> " ".repeat((82 - message.length())/2)).getOrElse("");
-      String paddedMessage = new StringBuilder().insert(0, padding).append(message).append(padding).toString();
+      String paddedMessage = message + padding;
       lines = lines
           .append(String.format("|%82s|", paddedMessage))
           .append("+----------------------------------------------------------------------------------+");
@@ -119,9 +99,5 @@ public class GuiRenderer {
 
     return lines.reduce((acc, elem) -> acc + "\n" + elem);
 
-  }
-
-  private static Tuple2<Integer, Integer> centToEuro(int cent) {
-    return new Tuple2<>(cent / 100, Math.abs(cent % 100));
   }
 }

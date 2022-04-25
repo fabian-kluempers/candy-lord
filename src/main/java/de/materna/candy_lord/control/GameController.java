@@ -28,7 +28,7 @@ public class GameController implements GameAPI {
       new City("Stuttgart", new Point(48, 9), 1000, 155)
   ).toMap(city -> new Tuple2<>(city.name(), city));
 
-  private static final int MAX_NUM_OF_DAYS = 5;
+  private static final int MAX_NUM_OF_DAYS = 30;
 
   private static final Predicate<Integer> END_CONDITION = (ref) -> ref >= MAX_NUM_OF_DAYS;
 
@@ -125,7 +125,7 @@ public class GameController implements GameAPI {
     Tuple2<Option<String>, Player> effectResult = (rng.nextDouble() > 0.5)
         ?
         state().player().visitCityWithEffect(
-            city.withScaledCandyPrices(),
+            city.withScaledCandyPrices(rng),
             state().ticketPrices().get(city.name()).get(),
             effect
         )
@@ -133,7 +133,7 @@ public class GameController implements GameAPI {
         new Tuple2<>(
             Option.none(),
             state().player().visitCity(
-                city.withScaledCandyPrices(),
+                city.withScaledCandyPrices(rng),
                 state().ticketPrices().get(city.name()).get()
             )
         );
