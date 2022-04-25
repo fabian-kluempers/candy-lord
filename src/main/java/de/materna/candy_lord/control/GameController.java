@@ -1,11 +1,9 @@
 package de.materna.candy_lord.control;
 
 import de.materna.candy_lord.api.GameAPI;
-import de.materna.candy_lord.domain.CandyType;
-import de.materna.candy_lord.domain.City;
-import de.materna.candy_lord.domain.GameState;
-import de.materna.candy_lord.domain.Player;
+import de.materna.candy_lord.domain.*;
 import de.materna.candy_lord.dto.StateDTO;
+import de.materna.candy_lord.util.EuroRepresentation;
 import io.vavr.*;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
@@ -15,6 +13,7 @@ import io.vavr.control.Try;
 
 import java.awt.*;
 import java.util.Random;
+import java.util.function.Predicate;
 
 public class GameController implements GameAPI {
   public static final Map<String, City> cities = List.of(
@@ -24,6 +23,10 @@ public class GameController implements GameAPI {
       new City("Hamburg", new Point(53, 10), 1000, 140),
       new City("Stuttgart", new Point(48, 9), 1000, 155)
   ).toMap(city -> new Tuple2<>(city.name(), city));
+
+  private static final int MAX_NUM_OF_DAYS = 5;
+
+  private static final Predicate<Integer> END_CONDITION = (ref) -> ref >= MAX_NUM_OF_DAYS;
 
   private List<GameState> history;
 
@@ -68,7 +71,9 @@ public class GameController implements GameAPI {
     history = List.of(
         new GameState(
             new Player(cities.get("Dortmund").get(), 100000, 1000),
-            calculateTicketPrices(cities.get("Dortmund").get())
+            calculateTicketPrices(cities.get("Dortmund").get()),
+            0,
+            Option.of("Welcome to Candy Lord!")
         )
     );
     return StateMapper.map(state());
@@ -78,14 +83,57 @@ public class GameController implements GameAPI {
     return StateMapper.map(state());
   }
 
+  @Override public boolean isOver() {
+    return END_CONDITION.test(state().day());
+  }
+
+  @Override public Option<String> getFinalScoreDescription() {
+    if (isOver()) {
+      Player player = state().player();
+      int score =
+          player.cash() +
+              player.candies()
+                  .foldLeft(
+                      0,
+                      (acc, entry) -> acc + player.city().candyPrices().get(entry._1).get() * entry._2
+                  );
+      EuroRepresentation euroRep = EuroRepresentation.of(score);
+      return Option.of(String.format("Your final cash amount after selling all candies is: %d.%2d€", euroRep.euro, euroRep.cent));
+    } else return Option.none();
+  }
+
   private GameState visitCity(City city) {
-    updateState(
-        new GameState(
+    // Choose one effect
+    Function1<Player, Tuple2<Option<String>, Player>> effect = List.of(
+            Function2.of(Events::mugMoney),
+            Function2.of(Events::mugCandy),
+            Function2.of(Events::giftMoney),
+            Function2.of(Events::giftCandy)
+        )
+        .get(rng.nextInt(0, 4))
+        .apply(rng); // partially apply the rng
+    // Trigger effect with a chance of 50%
+    Tuple2<Option<String>, Player> effectResult = (rng.nextDouble() > 0.5)
+        ?
+        state().player().visitCityWithEffect(
+            city.withScaledCandyPrices(),
+            state().ticketPrices().get(city.name()).get(),
+            effect
+        )
+        :
+        new Tuple2<>(
+            Option.none(),
             state().player().visitCity(
                 city.withScaledCandyPrices(),
                 state().ticketPrices().get(city.name()).get()
-            ),
-            calculateTicketPrices(city)
+            )
+        );
+
+    updateState(
+        state().visit(
+            effectResult._2,
+            calculateTicketPrices(city),
+            effectResult._1
         )
     );
     return state();

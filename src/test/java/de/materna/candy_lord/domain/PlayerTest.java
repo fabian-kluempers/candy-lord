@@ -2,6 +2,7 @@ package de.materna.candy_lord.domain;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
+import io.vavr.control.Option;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
@@ -57,7 +58,7 @@ class PlayerTest {
         .visitCityWithEffect(
             otherCity,
             5,
-            (player) -> new Tuple2<>("Du hast 10Cent bekommen!", player.mapCash(x -> x + 10))
+            (player) -> new Tuple2<>(Option.of("Du hast 10Cent bekommen!"), player.mapCash(x -> x + 10))
         );
     assertEquals(otherCity, result._2.city());
     assertEquals(5, result._2.cash());
@@ -66,7 +67,7 @@ class PlayerTest {
         .visitCityWithEffect(
             otherCity,
             5,
-            (player -> new Tuple2<>("Du hast 5 Schokoladen bekommen!", player.mapCandyAmount(CandyType.CHOCOLATE, x -> x + 5)))
+            (player -> new Tuple2<>(Option.of("Du hast 5 Schokoladen bekommen!"), player.mapCandyAmount(CandyType.CHOCOLATE, x -> x + 5)))
         );
     assertEquals(otherCity, result._2.city());
     assertEquals(-5, result._2.cash());

@@ -7,6 +7,7 @@ import de.materna.candy_lord.dto.StateDTO;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import io.vavr.collection.List;
+import io.vavr.control.Try;
 
 public class GuiRenderer {
   public static String render(StateDTO state) {
@@ -36,12 +37,12 @@ public class GuiRenderer {
     Tuple2<Integer, Integer> cash = centToEuro(player.cash());
 
     String header = String.format(
-        "| City: %20s            Maximum Capacity: %6d, Cash: %6d.%2d€ |",
-        city.name(), player.maxCapacity(), cash._1, cash._2
+        "| City: %-20s   Day: %2d, Maximum Capacity: %6d, Cash: %6d.%02d€ |",
+        city.name(), state.day(), player.maxCapacity(), cash._1, cash._2
     );
 
-    String candyTrFormat = "| %-20s | %7d | %8d.%2d€ ";
-    String ticketTrFormat = " %-20s: %6d.%2d€ |";
+    String candyTrFormat = "| %-20s | %7d | %8d.%02d€ ";
+    String ticketTrFormat = " %-20s: %6d.%02d€ |";
     var candyPrices = city.candyPrices();
 
     var ticketPriceTable = state.ticketPrices()
@@ -88,8 +89,7 @@ public class GuiRenderer {
         | sell candy     : s candy-name amount                                             |
         | travel to city : t city-name                                                     |
         | undo turn      : undo                                                            |
-        +----------------------------------------------------------------------------------+
-        """;
+        +----------------------------------------------------------------------------------+""";
 
     List<String> lines = List
         .of("+----------------------------------------------------------------------------------+")
@@ -102,25 +102,24 @@ public class GuiRenderer {
         .appendAll(table)
         .append("+----------------------+---------+--------------+----------------------------------+")
         .append(legend);
+
+
+
+    // insert centered message
+    if (state.message().isDefined()) {
+      String message = state.message().get();
+      String padding = Try.of(() -> " ".repeat((82 - message.length())/2)).getOrElse("");
+      String paddedMessage = new StringBuilder().insert(0, padding).append(message).append(padding).toString();
+      lines = lines
+          .append(String.format("|%82s|", paddedMessage))
+          .append("+----------------------------------------------------------------------------------+");
+    }
+
     return lines.reduce((acc, elem) -> acc + "\n" + elem);
 
   }
 
   private static Tuple2<Integer, Integer> centToEuro(int cent) {
     return new Tuple2<>(cent / 100, Math.abs(cent % 100));
-  }
-
-  static class EuroRepresentation {
-    public final int euro;
-    public final int cent;
-
-    private EuroRepresentation(int euro, int cent) {
-      this.euro = euro;
-      this.cent = cent;
-    }
-
-    public static EuroRepresentation of(int cent) {
-      return new EuroRepresentation(cent / 100, Math.abs(cent % 100));
-    }
   }
 }

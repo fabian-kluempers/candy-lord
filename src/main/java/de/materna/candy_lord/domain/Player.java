@@ -6,6 +6,7 @@ import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,7 +50,7 @@ public record Player(City city, int cash, Map<CandyType, Integer> candies, int m
 
   @Contract(pure = true)
   public Either<String, Player> buyCandy(@NotNull CandyType type, int amount) {
-    return (candies.values().sum().intValue() + amount > maxCapacity)
+    return (remainingCapacity() < amount)
         ? Either.left("Your pockets are too small to carry more candies!")
         : city
         .candyPrices()
@@ -66,10 +67,10 @@ public record Player(City city, int cash, Map<CandyType, Integer> candies, int m
   }
 
   @Contract(pure = true)
-  public Tuple2<String, Player> visitCityWithEffect(
+  public Tuple2<Option<String>, Player> visitCityWithEffect(
       @NotNull City city,
       int ticketPrice,
-      @NotNull Function1<Player, Tuple2<String, Player>> effect
+      @NotNull Function1<Player, Tuple2<Option<String>, Player>> effect
   ) {
     return effect.apply(visitCity(city, ticketPrice));
   }
@@ -93,5 +94,11 @@ public record Player(City city, int cash, Map<CandyType, Integer> candies, int m
     return this
         .withCash(cash - price * amount)
         .withCandies(candies.put(type, candies.get(type).get() + amount));
+  }
+
+  @Contract(pure = true)
+  public int remainingCapacity() {
+    // maybe convert to field bcs it's effectively a constant
+    return maxCapacity - candies.values().sum().intValue();
   }
 }

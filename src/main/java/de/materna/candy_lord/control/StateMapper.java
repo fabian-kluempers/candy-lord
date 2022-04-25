@@ -7,12 +7,7 @@ import de.materna.candy_lord.dto.StateDTO;
 import io.vavr.control.Option;
 
 class StateMapper {
-
   public static StateDTO map(GameState state) {
-    return map(state, Option.none());
-  }
-
-  public static StateDTO map(GameState state, Option<String> message) {
     return new StateDTO(
         new CityDTO(
             state.player().city().name(),
@@ -24,7 +19,8 @@ class StateMapper {
             state.player().candies()
         ),
         state.ticketPrices(),
-        message
+        state.message(),
+        state.day()
     );
   }
 }

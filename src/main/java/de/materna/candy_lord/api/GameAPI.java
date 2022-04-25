@@ -18,6 +18,10 @@ public interface GameAPI {
 
   StateDTO getState();
 
+  boolean isOver();
+
+  Option<String> getFinalScoreDescription();
+
   static GameAPI create() {
     return new GameController();
   }
