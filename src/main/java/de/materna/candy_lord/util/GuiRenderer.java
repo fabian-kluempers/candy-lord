@@ -22,8 +22,8 @@ public class GuiRenderer {
         city.name(), state.day(), player.maxCapacity(), cash.euro, cash.cent
     );
 
-    String candyTrFormat = "| [%d] %-16s | %7d | %8d.%02d€ ";
-    String ticketTrFormat = " [%d] %-16s: %6d.%02d€ |";
+    String candyTrFormat = "| [%1d] %-16s | %7d | %8d.%02d€ ";
+    String ticketTrFormat = " [%1d] %-16s: %6d.%02d€ |";
     var candyPrices = city.candyPrices();
 
     var ticketPriceTable = state.ticketPrices()
@@ -59,10 +59,11 @@ public class GuiRenderer {
     var maxTableSize = Math.max(ticketPriceTable.length(), candyTable.length());
 
     //make tables same size
-    var paddingElement = String.format(candyTrFormat, new Object[5]);
-    candyTable.padTo(maxTableSize, paddingElement);
-    paddingElement = String.format(ticketTrFormat, new Object[4]);
-    ticketPriceTable.padTo(maxTableSize, paddingElement);
+
+    String candyPad = String.format("|%22s|%9s|%14s", "", "", "");
+    candyTable = candyTable.padTo(maxTableSize, candyPad);
+    String ticketPad = " ".repeat(34) + "|";
+    ticketPriceTable = ticketPriceTable.padTo(maxTableSize, ticketPad);
 
     var table = candyTable.zipWith(ticketPriceTable, (left, right) -> left + "|" + right);
 
