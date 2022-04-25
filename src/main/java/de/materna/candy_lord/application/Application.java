@@ -2,7 +2,6 @@ package de.materna.candy_lord.application;
 
 import de.materna.candy_lord.api.GameAPI;
 import de.materna.candy_lord.control.IOController;
-import de.materna.candy_lord.util.GuiRenderer;
 
 import java.util.Scanner;
 
@@ -17,14 +16,15 @@ public class Application {
       String input = scanner.nextLine().trim();
       if (input.equalsIgnoreCase("Y")) {
         playRound(game, scanner, io);
-      } else if (input.equalsIgnoreCase("N"))
+      } else if (input.equalsIgnoreCase("N")) {
         System.out.println("Goodbye!");
         System.exit(0);
+      }
     }
   }
 
   public static void playRound(GameAPI game, Scanner scanner, IOController io) {
-    System.out.println(GuiRenderer.render(game.newGame()));
+    System.out.println(io.renderState(game.newGame()));
     while (!game.isOver()) {
       String input = scanner.nextLine();
       if (input.trim().equalsIgnoreCase("stop")) return;

@@ -4,9 +4,13 @@ import de.materna.candy_lord.api.GameAPI;
 import de.materna.candy_lord.domain.*;
 import de.materna.candy_lord.dto.StateDTO;
 import de.materna.candy_lord.util.EuroRepresentation;
-import io.vavr.*;
+import io.vavr.Function1;
+import io.vavr.Function2;
+import io.vavr.Function3;
+import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -19,7 +23,7 @@ public class GameController implements GameAPI {
   public static final Map<String, City> cities = List.of(
       new City("Dortmund", new Point(51, 7), 1000, 150),
       new City("Berlin", new Point(52, 13), 1000, 120),
-      new City("Frankfurt am Main", new Point(50, 8), 1000, 170),
+      new City("Frankfurt a.M.", new Point(50, 8), 1000, 170),
       new City("Hamburg", new Point(53, 10), 1000, 140),
       new City("Stuttgart", new Point(48, 9), 1000, 155)
   ).toMap(city -> new Tuple2<>(city.name(), city));
@@ -90,16 +94,21 @@ public class GameController implements GameAPI {
   @Override public Option<String> getFinalScoreDescription() {
     if (isOver()) {
       Player player = state().player();
-      int score =
-          player.cash() +
-              player.candies()
-                  .foldLeft(
-                      0,
-                      (acc, entry) -> acc + player.city().candyPrices().get(entry._1).get() * entry._2
-                  );
+      int cashForCandies = player
+          .candies()
+          .foldLeft(0, (acc, entry) -> acc + player.city().candyPrices().get(entry._1).get() * entry._2);
+      int score = player.cash() + cashForCandies;
       EuroRepresentation euroRep = EuroRepresentation.of(score);
-      return Option.of(String.format("Your final cash amount after selling all candies is: %d.%2d€", euroRep.euro, euroRep.cent));
+      return Option.of(String.format(
+          "Your final cash amount after selling all candies is: %d.%2d€",
+          euroRep.euro,
+          euroRep.cent
+      ));
     } else return Option.none();
+  }
+
+  @Override public Set<String> getCityNames() {
+    return cities.keySet();
   }
 
   private GameState visitCity(City city) {

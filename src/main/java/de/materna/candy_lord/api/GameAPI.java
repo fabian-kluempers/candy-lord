@@ -2,6 +2,7 @@ package de.materna.candy_lord.api;
 
 import de.materna.candy_lord.control.GameController;
 import de.materna.candy_lord.dto.StateDTO;
+import io.vavr.collection.Set;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
@@ -21,6 +22,8 @@ public interface GameAPI {
   boolean isOver();
 
   Option<String> getFinalScoreDescription();
+
+  Set<String> getCityNames();
 
   static GameAPI create() {
     return new GameController();

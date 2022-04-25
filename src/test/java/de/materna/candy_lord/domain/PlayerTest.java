@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PlayerTest {
   private static final Player initialPlayer = new Player(
@@ -62,7 +63,7 @@ class PlayerTest {
         );
     assertEquals(otherCity, result._2.city());
     assertEquals(5, result._2.cash());
-    assertEquals("Du hast 10Cent bekommen!", result._1);
+    assertEquals("Du hast 10Cent bekommen!", result._1.get());
     result = initialPlayer
         .visitCityWithEffect(
             otherCity,
@@ -71,6 +72,6 @@ class PlayerTest {
         );
     assertEquals(otherCity, result._2.city());
     assertEquals(-5, result._2.cash());
-    assertEquals("Du hast 5 Schokoladen bekommen!", result._1);
+    assertEquals("Du hast 5 Schokoladen bekommen!", result._1.get());
   }
 }

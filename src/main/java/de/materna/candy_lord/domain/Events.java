@@ -2,7 +2,6 @@ package de.materna.candy_lord.domain;
 
 import de.materna.candy_lord.util.EuroRepresentation;
 import io.vavr.Tuple2;
-
 import io.vavr.control.Option;
 
 import java.util.Random;
@@ -59,9 +58,5 @@ public class Events {
               new Tuple2<Option<String>, Player>(Option.none(), player);
         }
     ).get();
-  }
-
-  public static void main(String[] args) {
-    System.out.println(Option.of(null));
   }
 }

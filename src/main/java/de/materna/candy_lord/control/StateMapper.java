@@ -4,7 +4,6 @@ import de.materna.candy_lord.domain.GameState;
 import de.materna.candy_lord.dto.CityDTO;
 import de.materna.candy_lord.dto.PlayerDTO;
 import de.materna.candy_lord.dto.StateDTO;
-import io.vavr.control.Option;
 
 class StateMapper {
   public static StateDTO map(GameState state) {

@@ -7,13 +7,14 @@ import de.materna.candy_lord.dto.StateDTO;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.control.Try;
 
 public class GuiRenderer {
-  public static String render(StateDTO state) {
-    //TODO custom message
+  public static String render(StateDTO state, Map<CandyType, Integer> candyIndices, Map<String, Integer> cityIndices) {
     PlayerDTO player = state.player();
     CityDTO city = state.city();
+    // template
     String s = """
         +----------------------------------------------------------------------------------+
         |                                   Candy Lord                                     |
@@ -41,24 +42,24 @@ public class GuiRenderer {
         city.name(), state.day(), player.maxCapacity(), cash._1, cash._2
     );
 
-    String candyTrFormat = "| %-20s | %7d | %8d.%02d€ ";
-    String ticketTrFormat = " %-20s: %6d.%02d€ |";
+    String candyTrFormat = "| [%d] %-16s | %7d | %8d.%02d€ ";
+    String ticketTrFormat = " [%d] %-16s: %6d.%02d€ |";
     var candyPrices = city.candyPrices();
 
     var ticketPriceTable = state.ticketPrices()
         .toList()
-        .sortBy(Tuple2::_2)
-        .reverse()
+        .sortBy(entry -> -entry._1.length()) // descending (notice -length)
         .map(tuple -> tuple.map2(EuroRepresentation::of))
         .map(tuple -> String.format(
             ticketTrFormat,
+            cityIndices.get(tuple._1).get(),
             tuple._1,
             tuple._2.euro,
             tuple._2.cent
         ));
 
     var candyTable = List.of(CandyType.values()).map((type) ->
-            new Tuple3<CandyType, Integer, Integer>(
+            new Tuple3<>(
                 type,
                 player.candies().get(type).get(),
                 candyPrices.get(type).get()
@@ -68,6 +69,7 @@ public class GuiRenderer {
         .map(tuple -> tuple.map3(EuroRepresentation::of))
         .map(tuple -> String.format(
             candyTrFormat,
+            candyIndices.get(tuple._1).get(),
             tuple._1,
             tuple._2,
             tuple._3.euro,
@@ -77,17 +79,17 @@ public class GuiRenderer {
     var maxTableSize = Math.max(ticketPriceTable.length(), candyTable.length());
 
     //make tables same size
-    var paddingElement = String.format(candyTrFormat, null, null, null, null);
+    var paddingElement = String.format(candyTrFormat, null, null, null, null, null);
     candyTable.padTo(maxTableSize, paddingElement);
-    paddingElement = String.format(ticketTrFormat, null, null, null);
+    paddingElement = String.format(ticketTrFormat, null, null, null, null);
     ticketPriceTable.padTo(maxTableSize, paddingElement);
 
     var table = candyTable.zipWith(ticketPriceTable, (left, right) -> left + "|" + right);
 
     String legend = """
-        | buy candy      : b candy-name amount                                             |
-        | sell candy     : s candy-name amount                                             |
-        | travel to city : t city-name                                                     |
+        | buy candy      : b candy-index amount                                            |
+        | sell candy     : s candy-index amount                                            |
+        | travel to city : t city-index                                                    |
         | undo turn      : undo                                                            |
         +----------------------------------------------------------------------------------+""";
 
