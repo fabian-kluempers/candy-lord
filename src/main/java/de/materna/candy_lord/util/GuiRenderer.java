@@ -4,7 +4,6 @@ import de.materna.candy_lord.domain.CandyType;
 import de.materna.candy_lord.dto.CityDTO;
 import de.materna.candy_lord.dto.PlayerDTO;
 import de.materna.candy_lord.dto.StateDTO;
-import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;

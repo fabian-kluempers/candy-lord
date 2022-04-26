@@ -5,6 +5,7 @@ import de.materna.candy_lord.domain.CandyType;
 import de.materna.candy_lord.dto.StateDTO;
 import de.materna.candy_lord.util.GuiRenderer;
 import de.materna.candy_lord.util.TupleUtil;
+import io.vavr.API;
 import io.vavr.Function1;
 import io.vavr.Function3;
 import io.vavr.Tuple2;
@@ -13,6 +14,9 @@ import io.vavr.collection.Map;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
+
+import static io.vavr.API.$;
+import static io.vavr.API.Case;
 
 
 public class IOController {
@@ -45,15 +49,17 @@ public class IOController {
 
 
   public String parse(String input) {
-    var args = input.split(" ", 2);
-    var trimmed = new Tuple2<>(args[0].trim(), Try.of(() -> args[1].trim()));
-    return switch (trimmed._1) {
-      case "t" -> travel(trimmed._2.get());
-      case "s" -> sell(trimmed._2.get());
-      case "b" -> buy(trimmed._2.get());
-      case "undo" -> undo();
-      default -> malformedCommand();
-    };
+    String match2Args = "\s+\\w+\s+\\w+\s?";
+    String trimmedInput = input.trim();
+    if (trimmedInput.matches("[tT]\s+\\w+")) {
+      return travel(trimmedInput);
+    } else if (trimmedInput.matches("[sS]" + match2Args)) {
+      return sell(trimmedInput);
+    } else if (trimmedInput.matches("[bB]" + match2Args)) {
+      return buy(trimmedInput);
+    } else {
+      return malformedCommand();
+    }
   }
 
   public String renderState(StateDTO state) {
@@ -71,9 +77,9 @@ public class IOController {
   }
 
   private String buy(String input) {
-    var args = input.split(" ", 2);
-    var validation = validateMapIndex(args[0], IndexToCandy)
-        .combine(validateInt(args[1]))
+    var args = input.split("\s+", 3);
+    var validation = validateMapIndex(args[1], IndexToCandy)
+        .combine(validateInt(args[2]))
         .ap((index, amount) -> game.buyCandy(IndexToCandy.get(index).get().name(), amount));
 
     if (validation.isValid()) {
@@ -84,9 +90,9 @@ public class IOController {
   }
 
   private String sell(String input) {
-    var args = input.split(" ", 2);
-    var validation = validateMapIndex(args[0], IndexToCandy)
-        .combine(validateInt(args[1]))
+    var args = input.split("\s+", 3);
+    var validation = validateMapIndex(args[1], IndexToCandy)
+        .combine(validateInt(args[2]))
         .ap((index, amount) -> game.sellCandy(IndexToCandy.get(index).get().name(), amount));
 
     if (validation.isValid()) {
@@ -111,7 +117,8 @@ public class IOController {
   }
 
   private String travel(String input) {
-    Validation<String, Either<String, StateDTO>> validation = validateMapIndex(input, IndexToCity)
+    var arg = input.split("\s+", 2)[1];
+    Validation<String, Either<String, StateDTO>> validation = validateMapIndex(arg, IndexToCity)
         .map((index) -> game.visitCity(IndexToCity.get(index).get()));
 
     if (validation.isValid()) {
