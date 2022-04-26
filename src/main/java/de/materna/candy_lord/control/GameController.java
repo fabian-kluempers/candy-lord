@@ -111,6 +111,10 @@ public class GameController implements GameAPI {
     return cities.keySet();
   }
 
+  @Override public Set<String> getCandyNames() {
+    return List.of(CandyType.values()).map(Enum::name).toSet();
+  }
+
   private GameState visitCity(City city) {
     // Choose one effect
     Function1<Player, Tuple2<Option<String>, Player>> effect = List.of(
