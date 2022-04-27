@@ -9,6 +9,7 @@ import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 
+import java.util.function.Function;
 
 
 public class IOController {
@@ -69,7 +70,7 @@ public class IOController {
     return game
         .undo()
         .map(render)
-        .getOrElse("You can't undo right now!");
+        .getOrElseGet(left -> left);
   }
 
   private String buy(String input) {

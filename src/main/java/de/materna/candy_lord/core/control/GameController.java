@@ -4,10 +4,7 @@ import de.materna.candy_lord.core.api.GameAPI;
 import de.materna.candy_lord.core.domain.*;
 import de.materna.candy_lord.core.dto.StateDTO;
 import de.materna.candy_lord.core.dto.EuroRepresentation;
-import io.vavr.Function1;
-import io.vavr.Function2;
-import io.vavr.Function3;
-import io.vavr.Tuple2;
+import io.vavr.*;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
@@ -28,7 +25,7 @@ public class GameController implements GameAPI {
       new City("Stuttgart", new Point(48, 9), 1000, 155)
   ).toMap(city -> new Tuple2<>(city.name(), city));
 
-  private static final int MAX_NUM_OF_DAYS = 30;
+  private static final int MAX_NUM_OF_DAYS = 5;
 
   private static final Predicate<Integer> END_CONDITION = (ref) -> ref >= MAX_NUM_OF_DAYS;
 
@@ -46,11 +43,11 @@ public class GameController implements GameAPI {
   private final Random rng;
 
   @Override public Either<String, StateDTO> visitCity(String city) {
-    if (state().player().city().name().equals(city)) return Either.left("You are already in " + city + ".");
-    else return cities
-        .get(city)
-        .toEither(city + " is not a valid city.")
-        .map(this::visitCity)
+    return state()
+        .filterNot(state -> state.player().city().name().equals(city))
+        .toEither("You are already in " + city + ".")
+        .flatMap(success -> cities.get(city).toEither(city + "is not a valid city"))
+        .flatMap(this::visitCity)
         .map(StateMapper::map);
   }
 
@@ -68,11 +65,12 @@ public class GameController implements GameAPI {
         .map(StateMapper::map);
   }
 
-  @Override public Option<StateDTO> undo() {
+  @Override public Either<String, StateDTO> undo() {
     return Option.of(history.tail())
         .filterNot(List::isEmpty)
         .peek(tail -> history = tail)
-        .map(List::head)
+        .toEither("You can't undo right now! Perform an Action first!")
+        .flatMap(history -> state())
         .map(StateMapper::map);
   }
 
@@ -85,20 +83,20 @@ public class GameController implements GameAPI {
             Option.of("Welcome to Candy Lord!")
         )
     );
-    return StateMapper.map(state());
+    return StateMapper.map(state().get());
   }
 
   @Override public StateDTO getState() {
-    return StateMapper.map(state());
+    return StateMapper.map(state().getOrElse(history.head()));
   }
 
   @Override public boolean isOver() {
-    return END_CONDITION.test(state().day());
+    return END_CONDITION.test(history.head().day());
   }
 
   @Override public Option<EuroRepresentation> getFinalScore() {
     if (isOver()) {
-      Player player = state().player();
+      Player player = history.head().player();
       int cashForCandies = player
           .candies()
           .foldLeft(0, (acc, entry) -> acc + player.city().candyPrices().get(entry._1).get() * entry._2);
@@ -115,16 +113,23 @@ public class GameController implements GameAPI {
     return List.of(CandyType.values()).map(Enum::name).toSet();
   }
 
-  private GameState visitCity(City city) {
-    Tuple2<Option<String>, Player> effectResult = visitWithEffect(city, getRandomEffect());
-    updateState(
-        state().visit(
-            effectResult._2,
-            calculateTicketPrices(city),
-            effectResult._1
+  private Either<String, GameState> visitCity(City city) {
+    return state()
+        .map(state -> {
+              var effectResult = visitWithEffect(
+                  city,
+                  state.player(),
+                  state.ticketPrices().get(city.name()).get(),
+                  getRandomEffect()
+              );
+              return state.visit(
+                  effectResult._2,
+                  calculateTicketPrices(city),
+                  effectResult._1
+              );
+            }
         )
-    );
-    return state();
+        .peek(this::updateState);
   }
 
   private Function1<Player, Tuple2<Option<String>, Player>> getRandomEffect() {
@@ -140,21 +145,23 @@ public class GameController implements GameAPI {
 
   private Tuple2<Option<String>, Player> visitWithEffect(
       City city,
+      Player player,
+      int ticketPrice,
       Function1<Player, Tuple2<Option<String>, Player>> effect
   ) {
     return (rng.nextDouble() > 0.5)
         ?
-        state().player().visitCityWithEffect(
+        player.visitCityWithEffect(
             city.withScaledCandyPrices(rng),
-            state().ticketPrices().get(city.name()).get(),
+            ticketPrice,
             effect
         )
         :
         new Tuple2<>(
             Option.none(),
-            state().player().visitCity(
+            player.visitCity(
                 city.withScaledCandyPrices(rng),
-                state().ticketPrices().get(city.name()).get()
+                ticketPrice
             )
         );
   }
@@ -168,8 +175,8 @@ public class GameController implements GameAPI {
   }
 
   private Either<String, GameState> candyTransaction(Function1<Player, Either<String, Player>> buyOrSell) {
-    return buyOrSell.apply(state().player())
-        .map(player -> state().withPlayer(player))
+    return state()
+        .flatMap(state -> buyOrSell.apply(state.player()).map(state::withPlayer))
         .peek(this::updateState);
   }
 
@@ -180,11 +187,11 @@ public class GameController implements GameAPI {
         );
   }
 
-  private GameState state() {
-    return history.head();
+  private Either<String, GameState> state() {
+    return isOver() ? Either.left("Game is already over!") : Either.right(history.head());
   }
 
   private void updateState(GameState state) {
-    history = history.prepend(state);
+    if (!isOver()) history = history.prepend(state);
   }
 }
