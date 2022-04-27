@@ -1,22 +1,15 @@
 package de.materna.candy_lord.control;
 
 import de.materna.candy_lord.api.GameAPI;
-import de.materna.candy_lord.domain.CandyType;
 import de.materna.candy_lord.dto.StateDTO;
 import de.materna.candy_lord.util.GuiRenderer;
 import de.materna.candy_lord.util.TupleUtil;
-import io.vavr.API;
-import io.vavr.Function1;
-import io.vavr.Function3;
-import io.vavr.Tuple2;
-import io.vavr.collection.List;
+import io.vavr.*;
 import io.vavr.collection.Map;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 
-import static io.vavr.API.$;
-import static io.vavr.API.Case;
 
 
 public class IOController {
@@ -24,7 +17,7 @@ public class IOController {
 
   private final Map<Integer, String> IndexToCity;
 
-  private final Map<Integer, CandyType> IndexToCandy;
+  private final Map<Integer, String> IndexToCandy;
 
   public IOController(GameAPI game) {
     this.game = game;
@@ -33,13 +26,15 @@ public class IOController {
         .reverse()
         .zipWithIndex()
         .toMap(entry -> entry.map2(x -> x + 1));
-    var candyToIndex = List.of(CandyType.values())
-        .sortBy(x -> -x.name().length()) // descending (notice -length)
+    var candyToIndex = game.getCandyNames().toList()
+        .sortBy(String::length)
+        .reverse()
         .zipWithIndex()
         .toMap(entry -> entry.map2(x -> x + 1));
-    this.render = Function3.of(GuiRenderer::render)
+    this.render = Function4.of(GuiRenderer::render)
         .reversed()
         .apply(
+            game.getCandyNames(),
             cityToIndex,
             candyToIndex
         );
@@ -82,7 +77,7 @@ public class IOController {
     var args = input.split("\s+", 3);
     var validation = validateMapIndex(args[1], IndexToCandy)
         .combine(validateInt(args[2]))
-        .ap((index, amount) -> game.buyCandy(IndexToCandy.get(index).get().name(), amount));
+        .ap((index, amount) -> game.buyCandy(IndexToCandy.get(index).get(), amount));
 
     if (validation.isValid()) {
       Either<String, StateDTO> result = validation.get();
@@ -95,7 +90,7 @@ public class IOController {
     var args = input.split("\s+", 3);
     var validation = validateMapIndex(args[1], IndexToCandy)
         .combine(validateInt(args[2]))
-        .ap((index, amount) -> game.sellCandy(IndexToCandy.get(index).get().name(), amount));
+        .ap((index, amount) -> game.sellCandy(IndexToCandy.get(index).get(), amount));
 
     if (validation.isValid()) {
       Either<String, StateDTO> result = validation.get();

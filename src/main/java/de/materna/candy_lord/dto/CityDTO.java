@@ -4,5 +4,5 @@ import de.materna.candy_lord.domain.CandyType;
 import io.vavr.collection.Map;
 
 
-public record CityDTO(String name, Map<CandyType, Integer> candyPrices) {
+public record CityDTO(String name, Map<String, Integer> candyPrices) {
 }

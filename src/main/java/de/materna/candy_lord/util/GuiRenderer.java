@@ -7,10 +7,11 @@ import de.materna.candy_lord.dto.StateDTO;
 import io.vavr.Tuple3;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.collection.Set;
 import io.vavr.control.Try;
 
 public class GuiRenderer {
-  public static String render(StateDTO state, Map<CandyType, Integer> candyIndices, Map<String, Integer> cityIndices) {
+  public static String render(StateDTO state, Map<String, Integer> candyIndices, Map<String, Integer> cityIndices, Set<String> candyNames) {
     PlayerDTO player = state.player();
     CityDTO city = state.city();
 
@@ -37,23 +38,21 @@ public class GuiRenderer {
             tuple._2.cent
         ));
 
-    var candyTable = List.of(CandyType.values()).map((type) ->
-            new Tuple3<>(
-                type,
-                player.candies().get(type).get(),
-                candyPrices.get(type).get()
-            )
-        )
-        .sortBy(tuple -> -tuple._1.name().length()) // descending (notice -length)
-        .map(tuple -> tuple.map3(EuroRepresentation::of))
-        .map(tuple -> String.format(
-            candyTrFormat,
-            candyIndices.get(tuple._1).get(),
-            tuple._1,
-            tuple._2,
-            tuple._3.euro,
-            tuple._3.cent
-        ));
+    var candyTable = candyNames.toList()
+        .sortBy(String::length)
+        .reverse()
+        .map(candy -> {
+              var euroRep = EuroRepresentation.of(candyPrices.get(candy).get());
+              return String.format(
+                  candyTrFormat,
+                  candyIndices.get(candy).get(),
+                  candy,
+                  player.candies().get(candy).get(),
+                  euroRep.euro,
+                  euroRep.cent
+              );
+            }
+        );
 
     var maxTableSize = Math.max(ticketPriceTable.length(), candyTable.length());
 
@@ -86,11 +85,10 @@ public class GuiRenderer {
         .append(legend);
 
 
-
     // insert centered message
     if (state.message().isDefined()) {
       String message = state.message().get();
-      String padding = Try.of(() -> " ".repeat((82 - message.length())/2)).getOrElse("");
+      String padding = Try.of(() -> " ".repeat((82 - message.length()) / 2)).getOrElse("");
       String paddedMessage = message + padding;
       lines = lines
           .append(String.format("|%82s|", paddedMessage))
