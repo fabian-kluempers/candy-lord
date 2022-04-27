@@ -7,6 +7,9 @@ import io.vavr.control.Option;
 import java.util.Random;
 
 public class Events {
+
+  private static final int MAX_GIFT_AMOUNT = 500_000;
+
   public static Tuple2<Option<String>, Player> mugMoney(Random rng, Player player) {
     String message = null;
     Player newPlayer = player;
@@ -20,8 +23,7 @@ public class Events {
   }
 
   public static Tuple2<Option<String>, Player> giftMoney(Random rng, Player player) {
-    //gift player random amount in [0€,5000€]
-    int amount = (int) Math.round(rng.nextDouble() * 500_000);
+    int amount = (int) Math.round(rng.nextDouble() * MAX_GIFT_AMOUNT);
     EuroRepresentation euroRepresentation = EuroRepresentation.of(amount);
     return new Tuple2<>(
         Option.of(String.format("You found %d.%02d€!", euroRepresentation.euro, euroRepresentation.cent)),
