@@ -3,6 +3,7 @@ package de.materna.candy_lord.core.control;
 import de.materna.candy_lord.core.api.GameAPI;
 import de.materna.candy_lord.core.domain.*;
 import de.materna.candy_lord.core.dto.StateDTO;
+import de.materna.candy_lord.core.dto.EuroRepresentation;
 import io.vavr.Function1;
 import io.vavr.Function2;
 import io.vavr.Function3;
@@ -95,14 +96,14 @@ public class GameController implements GameAPI {
     return END_CONDITION.test(state().day());
   }
 
-  @Override public Option<Integer> getFinalScore() {
+  @Override public Option<EuroRepresentation> getFinalScore() {
     if (isOver()) {
       Player player = state().player();
       int cashForCandies = player
           .candies()
           .foldLeft(0, (acc, entry) -> acc + player.city().candyPrices().get(entry._1).get() * entry._2);
       int score = player.cash() + cashForCandies;
-      return Option.of(score);
+      return Option.of(EuroRepresentation.of(score));
     } else return Option.none();
   }
 

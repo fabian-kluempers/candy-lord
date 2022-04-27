@@ -1,6 +1,6 @@
 package de.materna.candy_lord.core.domain;
 
-import de.materna.candy_lord.command_line_app.EuroRepresentation;
+import de.materna.candy_lord.core.dto.EuroRepresentation;
 import io.vavr.Tuple2;
 import io.vavr.control.Option;
 

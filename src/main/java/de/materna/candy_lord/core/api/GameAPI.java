@@ -2,6 +2,7 @@ package de.materna.candy_lord.core.api;
 
 import de.materna.candy_lord.core.control.GameController;
 import de.materna.candy_lord.core.dto.StateDTO;
+import de.materna.candy_lord.core.dto.EuroRepresentation;
 import io.vavr.collection.Set;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
@@ -73,10 +74,10 @@ public interface GameAPI {
   boolean isOver();
 
   /**
-   * Returns a String representation of the final score or nothing if the game is still in progress.
-   * @return Either a String representation of the final score or nothing.
+   * Returns a EuroRepresentation of the final score or nothing if the game is still in progress.
+   * @return Either a EuroRepresentation of the final score or nothing.
    */
-  Option<Integer> getFinalScore();
+  Option<EuroRepresentation> getFinalScore();
 
   /**
    * Returns all available city names for this game.

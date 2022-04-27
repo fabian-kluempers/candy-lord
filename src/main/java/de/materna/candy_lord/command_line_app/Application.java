@@ -32,11 +32,10 @@ public class Application {
     System.out.println("Game Over! Look at your Score below:");
     System.out.println(
         game.getFinalScore()
-            .map(EuroRepresentation::of)
-            .map(euroRep -> String.format(
+            .map(score -> String.format(
                 "Your final cash amount after selling all candies is: %d.%2d€",
-                euroRep.euro,
-                euroRep.cent
+                score.euro,
+                score.cent
             ))
             .getOrElse("")
     );

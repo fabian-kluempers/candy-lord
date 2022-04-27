@@ -13,11 +13,9 @@ public class GuiRenderer {
     PlayerDTO player = state.player();
     CityDTO city = state.city();
 
-    EuroRepresentation cash = EuroRepresentation.of(player.cash());
-
     String header = String.format(
         "| City: %-20s   Day: %2d, Maximum Capacity: %6d, Cash: %6d.%02d€ |",
-        city.name(), state.day(), player.maxCapacity(), cash.euro, cash.cent
+        city.name(), state.day(), player.maxCapacity(), player.cash().euro, player.cash().cent
     );
 
     String candyTrFormat = "| [%1d] %-16s | %7d | %8d.%02d€ ";
@@ -27,7 +25,6 @@ public class GuiRenderer {
     var ticketPriceTable = state.ticketPrices()
         .toList()
         .sortBy(entry -> -entry._1.length()) // descending (notice -length)
-        .map(tuple -> tuple.map2(EuroRepresentation::of))
         .map(tuple -> String.format(
             ticketTrFormat,
             cityIndices.get(tuple._1).get(),
@@ -39,17 +36,14 @@ public class GuiRenderer {
     var candyTable = candyNames.toList()
         .sortBy(String::length)
         .reverse()
-        .map(candy -> {
-              var euroRep = EuroRepresentation.of(candyPrices.get(candy).get());
-              return String.format(
-                  candyTrFormat,
-                  candyIndices.get(candy).get(),
-                  candy,
-                  player.candies().get(candy).get(),
-                  euroRep.euro,
-                  euroRep.cent
-              );
-            }
+        .map(candy -> String.format(
+                candyTrFormat,
+                candyIndices.get(candy).get(),
+                candy,
+                player.candies().get(candy).get(),
+                candyPrices.get(candy).get().euro,
+                candyPrices.get(candy).get().cent
+            )
         );
 
     var maxTableSize = Math.max(ticketPriceTable.length(), candyTable.length());
