@@ -57,6 +57,8 @@ public class IOController {
       return sell(trimmedInput);
     } else if (trimmedInput.matches("[bB]" + match2Args)) {
       return buy(trimmedInput);
+    } else if (trimmedInput.equalsIgnoreCase("undo")) {
+      return undo();
     } else {
       return malformedCommand();
     }
