@@ -50,7 +50,7 @@ public interface GameAPI {
    *
    * @return either the previous game state or nothing.
    */
-  Option<StateDTO> undo();
+  Either<String, StateDTO> undo();
 
   /**
    * Starts a new Game and returns a {@link StateDTO} representing the initial game state.
@@ -72,6 +72,13 @@ public interface GameAPI {
    * @return whether the game is over or not.
    */
   boolean isOver();
+
+  /**
+   * @see #isOver()
+   */
+  default boolean isNotOver() {
+    return !isOver();
+  }
 
   /**
    * Returns a EuroRepresentation of the final score or nothing if the game is still in progress.
