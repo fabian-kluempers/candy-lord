@@ -27,7 +27,7 @@ public class Application {
     System.out.println(io.renderState(game.newGame()));
     while (!game.isOver()) {
       String input = scanner.nextLine();
-      if (input.trim().equalsIgnoreCase("stop")) return;
+      if (input.trim().equalsIgnoreCase("exit")) return;
       System.out.println(io.parse(input));
     }
     System.out.println("Game Over! Look at your Score below:");
