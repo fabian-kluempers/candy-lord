@@ -1,7 +1,6 @@
-package de.materna.candy_lord.application;
+package de.materna.candy_lord.command_line_app;
 
-import de.materna.candy_lord.api.GameAPI;
-import de.materna.candy_lord.control.IOController;
+import de.materna.candy_lord.core.api.GameAPI;
 
 import java.util.Scanner;
 
@@ -31,6 +30,15 @@ public class Application {
       System.out.println(io.parse(input));
     }
     System.out.println("Game Over! Look at your Score below:");
-    System.out.println(game.getFinalScoreDescription().getOrElse(""));
+    System.out.println(
+        game.getFinalScore()
+            .map(EuroRepresentation::of)
+            .map(euroRep -> String.format(
+                "Your final cash amount after selling all candies is: %d.%2d€",
+                euroRep.euro,
+                euroRep.cent
+            ))
+            .getOrElse("")
+    );
   }
 }

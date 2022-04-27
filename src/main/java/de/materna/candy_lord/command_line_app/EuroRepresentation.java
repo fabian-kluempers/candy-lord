@@ -1,4 +1,4 @@
-package de.materna.candy_lord.util;
+package de.materna.candy_lord.command_line_app;
 
 public class EuroRepresentation {
   public final int euro;

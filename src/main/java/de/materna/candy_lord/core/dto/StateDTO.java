@@ -1,4 +1,4 @@
-package de.materna.candy_lord.dto;
+package de.materna.candy_lord.core.dto;
 
 import io.vavr.collection.Map;
 import io.vavr.control.Option;

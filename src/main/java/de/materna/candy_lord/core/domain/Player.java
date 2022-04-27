@@ -1,4 +1,4 @@
-package de.materna.candy_lord.domain;
+package de.materna.candy_lord.core.domain;
 
 import io.vavr.Function1;
 import io.vavr.Tuple;

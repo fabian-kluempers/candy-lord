@@ -1,6 +1,5 @@
-package de.materna.candy_lord.dto;
+package de.materna.candy_lord.core.dto;
 
-import de.materna.candy_lord.domain.CandyType;
 import io.vavr.collection.Map;
 
 public record PlayerDTO(int cash, int maxCapacity, Map<String, Integer> candies) {

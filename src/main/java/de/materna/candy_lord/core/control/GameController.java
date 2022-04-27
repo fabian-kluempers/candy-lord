@@ -1,9 +1,8 @@
-package de.materna.candy_lord.control;
+package de.materna.candy_lord.core.control;
 
-import de.materna.candy_lord.api.GameAPI;
-import de.materna.candy_lord.domain.*;
-import de.materna.candy_lord.dto.StateDTO;
-import de.materna.candy_lord.util.EuroRepresentation;
+import de.materna.candy_lord.core.api.GameAPI;
+import de.materna.candy_lord.core.domain.*;
+import de.materna.candy_lord.core.dto.StateDTO;
 import io.vavr.Function1;
 import io.vavr.Function2;
 import io.vavr.Function3;
@@ -96,19 +95,14 @@ public class GameController implements GameAPI {
     return END_CONDITION.test(state().day());
   }
 
-  @Override public Option<String> getFinalScoreDescription() {
+  @Override public Option<Integer> getFinalScore() {
     if (isOver()) {
       Player player = state().player();
       int cashForCandies = player
           .candies()
           .foldLeft(0, (acc, entry) -> acc + player.city().candyPrices().get(entry._1).get() * entry._2);
       int score = player.cash() + cashForCandies;
-      EuroRepresentation euroRep = EuroRepresentation.of(score);
-      return Option.of(String.format(
-          "Your final cash amount after selling all candies is: %d.%2d€",
-          euroRep.euro,
-          euroRep.cent
-      ));
+      return Option.of(score);
     } else return Option.none();
   }
 

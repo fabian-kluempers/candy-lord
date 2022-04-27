@@ -1,4 +1,4 @@
-package de.materna.candy_lord.domain;
+package de.materna.candy_lord.core.domain;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
@@ -17,8 +17,7 @@ class PlayerTest {
       10
   );
 
-  @Test
-  void buyCandy() {
+  @Test void buyCandy() {
     var testNotEnoughMoney = initialPlayer.withCash(20).buyCandy(CandyType.MARSHMALLOW, 10);
     assertTrue(testNotEnoughMoney.isLeft());
     assertEquals("You don't have enough money!", testNotEnoughMoney.getLeft());
@@ -30,8 +29,7 @@ class PlayerTest {
     assertEquals("Your pockets are too small to carry more candies!", testNotEnoughCapacity.getLeft());
   }
 
-  @Test
-  void sellCandy() {
+  @Test void sellCandy() {
     var playerWith10MM = initialPlayer
         .withCash(0)
         .withCandies(initialPlayer.candies().put(CandyType.MARSHMALLOW, 10));
@@ -44,34 +42,32 @@ class PlayerTest {
     assertEquals(45, testValid.get().cash());
   }
 
-  @Test
-  void visitCity() {
+  @Test void visitCity() {
     var otherCity = new City("Berlin", new Point(0, 0), 1, 1);
     var playerInNewCity = initialPlayer.withCash(10).visitCity(otherCity, 5);
     assertEquals(otherCity, playerInNewCity.city());
     assertEquals(5, playerInNewCity.cash());
   }
 
-  @Test
-  void visitCityWithEffect() {
+  @Test void visitCityWithEffect() {
     var otherCity = new City("Berlin", new Point(0, 0), 1, 1);
     var result = initialPlayer
         .visitCityWithEffect(
             otherCity,
             5,
-            (player) -> new Tuple2<>(Option.of("Du hast 10Cent bekommen!"), player.mapCash(x -> x + 10))
+            (player) -> new Tuple2<>(Option.of("You found 10cent!"), player.mapCash(x -> x + 10))
         );
     assertEquals(otherCity, result._2.city());
     assertEquals(5, result._2.cash());
-    assertEquals("Du hast 10Cent bekommen!", result._1.get());
+    assertEquals("You found 10cent!", result._1.get());
     result = initialPlayer
         .visitCityWithEffect(
             otherCity,
             5,
-            (player -> new Tuple2<>(Option.of("Du hast 5 Schokoladen bekommen!"), player.mapCandyAmount(CandyType.CHOCOLATE, x -> x + 5)))
+            (player -> new Tuple2<>(Option.of("You found 5 Chocolates!"), player.mapCandyAmount(CandyType.CHOCOLATE, x -> x + 5)))
         );
     assertEquals(otherCity, result._2.city());
     assertEquals(-5, result._2.cash());
-    assertEquals("Du hast 5 Schokoladen bekommen!", result._1.get());
+    assertEquals("You found 5 Chocolates!", result._1.get());
   }
 }

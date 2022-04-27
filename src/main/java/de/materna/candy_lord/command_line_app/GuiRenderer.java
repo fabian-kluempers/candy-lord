@@ -1,11 +1,8 @@
-package de.materna.candy_lord.util;
+package de.materna.candy_lord.command_line_app;
 
-import de.materna.candy_lord.domain.CandyType;
-import de.materna.candy_lord.dto.CityDTO;
-import de.materna.candy_lord.dto.PlayerDTO;
-import de.materna.candy_lord.dto.StateDTO;
-import io.vavr.Function1;
-import io.vavr.Function2;
+import de.materna.candy_lord.core.dto.CityDTO;
+import de.materna.candy_lord.core.dto.PlayerDTO;
+import de.materna.candy_lord.core.dto.StateDTO;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;

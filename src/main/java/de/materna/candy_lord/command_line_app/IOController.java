@@ -1,8 +1,7 @@
-package de.materna.candy_lord.control;
+package de.materna.candy_lord.command_line_app;
 
-import de.materna.candy_lord.api.GameAPI;
-import de.materna.candy_lord.dto.StateDTO;
-import de.materna.candy_lord.util.GuiRenderer;
+import de.materna.candy_lord.core.api.GameAPI;
+import de.materna.candy_lord.core.dto.StateDTO;
 import de.materna.candy_lord.util.TupleUtil;
 import io.vavr.*;
 import io.vavr.collection.Map;

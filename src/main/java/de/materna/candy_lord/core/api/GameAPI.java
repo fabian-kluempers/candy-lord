@@ -1,7 +1,7 @@
-package de.materna.candy_lord.api;
+package de.materna.candy_lord.core.api;
 
-import de.materna.candy_lord.control.GameController;
-import de.materna.candy_lord.dto.StateDTO;
+import de.materna.candy_lord.core.control.GameController;
+import de.materna.candy_lord.core.dto.StateDTO;
 import io.vavr.collection.Set;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
@@ -76,7 +76,7 @@ public interface GameAPI {
    * Returns a String representation of the final score or nothing if the game is still in progress.
    * @return Either a String representation of the final score or nothing.
    */
-  Option<String> getFinalScoreDescription();
+  Option<Integer> getFinalScore();
 
   /**
    * Returns all available city names for this game.

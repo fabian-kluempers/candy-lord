@@ -1,9 +1,9 @@
-package de.materna.candy_lord.control;
+package de.materna.candy_lord.core.control;
 
-import de.materna.candy_lord.domain.GameState;
-import de.materna.candy_lord.dto.CityDTO;
-import de.materna.candy_lord.dto.PlayerDTO;
-import de.materna.candy_lord.dto.StateDTO;
+import de.materna.candy_lord.core.domain.GameState;
+import de.materna.candy_lord.core.dto.CityDTO;
+import de.materna.candy_lord.core.dto.PlayerDTO;
+import de.materna.candy_lord.core.dto.StateDTO;
 
 class StateMapper {
   /**
