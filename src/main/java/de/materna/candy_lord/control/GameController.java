@@ -35,10 +35,15 @@ public class GameController implements GameAPI {
   private List<GameState> history;
 
   public GameController() {
+    this(new Random());
+  }
+
+  public GameController(Random rng) {
+    this.rng = rng;
     newGame();
   }
 
-  private static final Random rng = new Random();
+  private final Random rng;
 
   @Override public Either<String, StateDTO> visitCity(String city) {
     if (state().player().city().name().equals(city)) return Either.left("You are already in " + city + ".");
@@ -116,17 +121,33 @@ public class GameController implements GameAPI {
   }
 
   private GameState visitCity(City city) {
-    // Choose one effect
-    Function1<Player, Tuple2<Option<String>, Player>> effect = List.of(
+    Tuple2<Option<String>, Player> effectResult = visitWithEffect(city, getRandomEffect());
+    updateState(
+        state().visit(
+            effectResult._2,
+            calculateTicketPrices(city),
+            effectResult._1
+        )
+    );
+    return state();
+  }
+
+  private Function1<Player, Tuple2<Option<String>, Player>> getRandomEffect() {
+    return List.of(
             Function2.of(Events::mugMoney),
             Function2.of(Events::mugCandy),
             Function2.of(Events::giftMoney),
             Function2.of(Events::giftCandy)
         )
         .get(rng.nextInt(0, 4))
-        .apply(rng); // partially apply the rng
-    // Trigger effect with a chance of 50%
-    Tuple2<Option<String>, Player> effectResult = (rng.nextDouble() > 0.5)
+        .apply(rng);
+  }
+
+  private Tuple2<Option<String>, Player> visitWithEffect(
+      City city,
+      Function1<Player, Tuple2<Option<String>, Player>> effect
+  ) {
+    return (rng.nextDouble() > 0.5)
         ?
         state().player().visitCityWithEffect(
             city.withScaledCandyPrices(rng),
@@ -141,15 +162,6 @@ public class GameController implements GameAPI {
                 state().ticketPrices().get(city.name()).get()
             )
         );
-
-    updateState(
-        state().visit(
-            effectResult._2,
-            calculateTicketPrices(city),
-            effectResult._1
-        )
-    );
-    return state();
   }
 
   private Either<String, GameState> sellCandy(CandyType type, int amount) {
@@ -166,7 +178,7 @@ public class GameController implements GameAPI {
         .peek(this::updateState);
   }
 
-  private static Map<String, Integer> calculateTicketPrices(City from) {
+  private Map<String, Integer> calculateTicketPrices(City from) {
     return cities
         .mapValues(city ->
             from.priceTo(city, rng.nextDouble(0.8, 1.2))
