@@ -54,7 +54,10 @@ public class GuiRenderer {
   private static List<String> formatMessage(Option<String> message) {
     return message.map(msg ->
         List.of(
-            String.format("|%82s|", Try.of(() -> " ".repeat((82 - msg.length()) / 2)).getOrElse("")),
+            String.format(
+                "|%-82s|",
+                Try.of(() -> " ".repeat((82 - msg.length()) / 2)).getOrElse("") + msg
+            ),
             "+----------------------------------------------------------------------------------+"
         )
     ).getOrElse(List.empty());
