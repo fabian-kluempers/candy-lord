@@ -1,11 +1,13 @@
 package de.materna.candy_lord.command_line_app;
 
 import de.materna.candy_lord.core.dto.CityDTO;
+import de.materna.candy_lord.core.dto.EuroRepresentation;
 import de.materna.candy_lord.core.dto.PlayerDTO;
 import de.materna.candy_lord.core.dto.StateDTO;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 public class GuiRenderer {
@@ -20,42 +22,11 @@ public class GuiRenderer {
 
     String candyTrFormat = "| [%1d] %-16s | %7d | %8d.%02d€ ";
     String ticketTrFormat = " [%1d] %-16s: %6d.%02d€ |";
-    var candyPrices = city.candyPrices();
 
-    var ticketPriceTable = state.ticketPrices()
-        .toList()
-        .sortBy(entry -> -entry._1.length()) // descending (notice -length)
-        .map(tuple -> String.format(
-            ticketTrFormat,
-            cityIndices.get(tuple._1).get(),
-            tuple._1,
-            tuple._2.euro,
-            tuple._2.cent
-        ));
-
-    var candyTable = candyNames.toList()
-        .sortBy(String::length)
-        .reverse()
-        .map(candy -> String.format(
-                candyTrFormat,
-                candyIndices.get(candy).get(),
-                candy,
-                player.candies().get(candy).get(),
-                candyPrices.get(candy).get().euro,
-                candyPrices.get(candy).get().cent
-            )
-        );
-
-    var maxTableSize = Math.max(ticketPriceTable.length(), candyTable.length());
-
-    //make tables same size
-
-    String candyPad = String.format("|%22s|%9s|%14s", "", "", "");
-    candyTable = candyTable.padTo(maxTableSize, candyPad);
-    String ticketPad = " ".repeat(34) + "|";
-    ticketPriceTable = ticketPriceTable.padTo(maxTableSize, ticketPad);
-
-    var table = candyTable.zipWith(ticketPriceTable, (left, right) -> left + "|" + right);
+    List<String> table = createTable(
+        createTicketPriceTable(ticketTrFormat, cityIndices, state.ticketPrices()),
+        createCandyTable(candyTrFormat, candyIndices, player.candies(), city.candyPrices())
+    );
 
     String legend = """
         | buy candy      : b candy-index amount                                            |
@@ -65,7 +36,7 @@ public class GuiRenderer {
         | exit game      : exit                                                            |
         +----------------------------------------------------------------------------------+""";
 
-    List<String> lines = List
+    return List
         .of("+----------------------------------------------------------------------------------+")
         .append("|                                   Candy Lord                                     |")
         .append("+----------------------------------------------------------------------------------+")
@@ -75,20 +46,64 @@ public class GuiRenderer {
         .append("+----------------------+---------+--------------+----------------------------------+")
         .appendAll(table)
         .append("+----------------------+---------+--------------+----------------------------------+")
-        .append(legend);
+        .append(legend)
+        .appendAll(formatMessage(state.message()))
+        .reduce((acc, elem) -> acc + "\n" + elem);
+  }
 
+  private static List<String> formatMessage(Option<String> message) {
+    return message.map(msg ->
+        List.of(
+            String.format("|%82s|", Try.of(() -> " ".repeat((82 - msg.length()) / 2)).getOrElse("")),
+            "+----------------------------------------------------------------------------------+"
+        )
+    ).getOrElse(List.empty());
+  }
 
-    // insert centered message
-    if (state.message().isDefined()) {
-      String message = state.message().get();
-      String padding = Try.of(() -> " ".repeat((82 - message.length()) / 2)).getOrElse("");
-      String paddedMessage = message + padding;
-      lines = lines
-          .append(String.format("|%82s|", paddedMessage))
-          .append("+----------------------------------------------------------------------------------+");
-    }
+  private static List<String> createTicketPriceTable(
+      String ticketTrFormat,
+      Map<String, Integer> cityIndices,
+      Map<String, EuroRepresentation> ticketPrices
+  ) {
+    return ticketPrices
+        .toList()
+        .sortBy(entry -> -entry._1.length()) // descending (notice -length)
+        .map(tuple -> String.format(
+            ticketTrFormat,
+            cityIndices.get(tuple._1).get(), // index
+            tuple._1, // name
+            tuple._2.euro, // price
+            tuple._2.cent // price
+        ));
+  }
 
-    return lines.reduce((acc, elem) -> acc + "\n" + elem);
+  private static List<String> createCandyTable(
+      String candyTrFormat,
+      Map<String, Integer> candyIndices,
+      Map<String, Integer> candies,
+      Map<String, EuroRepresentation> candyPrices
+  ) {
+    return candyIndices.toList()
+        .sortBy(entry -> -entry._1.length()) // descending (notice -length)
+        .map(entry -> String.format(
+                candyTrFormat,
+                entry._2, // index
+                entry._1, // name
+                candies.get(entry._1).get(), // on hand
+                candyPrices.get(entry._1).get().euro, // price
+                candyPrices.get(entry._1).get().cent  // price
+            )
+        );
+  }
 
+  private static List<String> createTable(List<String> ticketPriceTable, List<String> candyTable) {
+    int maxTableSize = Math.max(ticketPriceTable.length(), candyTable.length());
+
+    String candyPad = String.format("|%22s|%9s|%14s", "", "", "");
+    candyTable = candyTable.padTo(maxTableSize, candyPad);
+    String ticketPad = " ".repeat(34) + "|";
+    ticketPriceTable = ticketPriceTable.padTo(maxTableSize, ticketPad);
+
+    return candyTable.zipWith(ticketPriceTable, (left, right) -> left + "|" + right);
   }
 }
