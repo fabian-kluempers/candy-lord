@@ -31,9 +31,9 @@ public record GameState(Player player, Map<String, Integer> ticketPrices, int da
    * This method increments the <code>day</code> in the new state.
    * This method should be used to model a state transformation after a city visit.
    *
-   * @param player the new state of the player.
+   * @param player       the new state of the player.
    * @param ticketPrices the new ticket prices.
-   * @param message the new message.
+   * @param message      the new message.
    * @return a new GameState with the new player, ticketPrices, message and incremented day.
    */
   public GameState visit(Player player, Map<String, Integer> ticketPrices, Option<String> message) {

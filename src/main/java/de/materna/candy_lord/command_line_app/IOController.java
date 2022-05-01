@@ -9,9 +9,6 @@ import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 
-import java.util.function.Function;
-
-
 public class IOController {
   private final GameAPI game;
 
@@ -75,15 +72,16 @@ public class IOController {
 
   private String buy(String input) {
     var args = input.split("\s+", 3);
-    var validation = validateMapIndex(args[1], IndexToCandy)
-        .combine(validateInt(args[2]))
-        .ap((index, amount) -> game.buyCandy(IndexToCandy.get(index).get(), amount));
+    var validation =
+        validateMapIndex(args[1], IndexToCandy).combine(validateInt(args[2]))
+            .ap((index, amount) -> game.buyCandy(IndexToCandy.get(index).get(), amount));
 
     if (validation.isValid()) {
       Either<String, StateDTO> result = validation.get();
       return result.isRight() ? render.apply(result.get()) : result.getLeft();
-    } else
+    } else {
       return validation.getError().reduce((x, y) -> x + "\n" + y);
+    }
   }
 
   private String sell(String input) {
@@ -95,8 +93,9 @@ public class IOController {
     if (validation.isValid()) {
       Either<String, StateDTO> result = validation.get();
       return result.isRight() ? render.apply(result.get()) : result.getLeft();
-    } else
+    } else {
       return validation.getError().reduce((x, y) -> x + "\n" + y);
+    }
   }
 
   private static Validation<String, Integer> validateInt(String arg) {
@@ -114,14 +113,16 @@ public class IOController {
   }
 
   private String travel(String input) {
-    var arg = input.split("\s+", 2)[1];
+    String arg = input.split("\s+", 2)[1];
     Validation<String, Either<String, StateDTO>> validation = validateMapIndex(arg, IndexToCity)
         .map((index) -> game.visitCity(IndexToCity.get(index).get()));
 
     if (validation.isValid()) {
       Either<String, StateDTO> result = validation.get();
       return result.isRight() ? render.apply(result.get()) : result.getLeft();
-    } else return validation.getError();
+    } else {
+      return validation.getError();
+    }
   }
 
   private String malformedCommand() {

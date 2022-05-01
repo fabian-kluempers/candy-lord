@@ -10,6 +10,7 @@ import io.vavr.Tuple;
 class StateMapper {
   /**
    * Maps all relevant Information of a {@link GameState} that can and should be exposed to the GUI/Frontend to a {@link StateDTO}.
+   *
    * @param state the GameState to map.
    * @return the StateDTO.
    */
@@ -17,7 +18,9 @@ class StateMapper {
     return new StateDTO(
         new CityDTO(
             state.player().city().name(),
-            state.player().city().candyPrices().map((candyType, price) -> Tuple.of(candyType.name(), EuroRepresentation.of(price)))
+            state.player().city().candyPrices().map((candyType, price) ->
+                Tuple.of(candyType.name(), EuroRepresentation.of(price))
+            )
         ),
         new PlayerDTO(
             EuroRepresentation.of(state.player().cash()),

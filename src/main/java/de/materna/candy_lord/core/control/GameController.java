@@ -102,7 +102,9 @@ public class GameController implements GameAPI {
           .foldLeft(0, (acc, entry) -> acc + player.city().candyPrices().get(entry._1).get() * entry._2);
       int score = player.cash() + cashForCandies;
       return Option.of(EuroRepresentation.of(score));
-    } else return Option.none();
+    } else {
+      return Option.none();
+    }
   }
 
   @Override public Set<String> getCityNames() {

@@ -9,7 +9,7 @@ import io.vavr.control.Option;
 
 public interface GameAPI {
   /**
-   * Ties to visit the city with the supplied name.
+   * Tries to visit the city with the supplied name.
    * Returns either a new {@link StateDTO} representing the new game state or an error message.
    * Some random events may happen during the visit. If such an event occurred,
    * a description of the event is available in the <code>StateDTO.message()</code>.

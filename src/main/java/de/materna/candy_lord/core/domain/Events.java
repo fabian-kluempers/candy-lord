@@ -33,22 +33,23 @@ public class Events {
 
   public static Tuple2<Option<String>, Player> mugCandy(Random rng, Player player) {
     return player.candies().maxBy(Tuple2::_2).map(entry -> {
-      int amount = rng.nextInt(0, entry._2 + 1);
-      return amount > 0
-          ?
-          new Tuple2<>(
-              Option.of((String.format("You got mugged! They took %d %s from you!", amount, entry._1))),
-              player.mapCandyAmount(entry._1, x -> x - amount)
-          )
-          :
-          new Tuple2<Option<String>, Player>(Option.none(), player);
-    }).get();
+          int amount = rng.nextInt(0, entry._2 + 1);
+          return amount > 0
+              ?
+              new Tuple2<>(
+                  Option.of((String.format("You got mugged! They took %d %s from you!", amount, entry._1))),
+                  player.mapCandyAmount(entry._1, x -> x - amount)
+              )
+              :
+              new Tuple2<Option<String>, Player>(Option.none(), player);
+        }
+    ).get();
   }
 
   public static Tuple2<Option<String>, Player> giftCandy(Random rng, Player player) {
     return player.candies().minBy(Tuple2::_2).map(entry -> {
-      System.out.println(entry);
-      System.out.println(player.remainingCapacity());
+          System.out.println(entry);
+          System.out.println(player.remainingCapacity());
           int amount = Math.min(rng.nextInt(entry._2, player.maxCapacity()), player.remainingCapacity());
           return amount > 0
               ?

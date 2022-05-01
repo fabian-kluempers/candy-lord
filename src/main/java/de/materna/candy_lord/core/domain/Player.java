@@ -39,7 +39,7 @@ public record Player(City city, int cash, Map<CandyType, Integer> candies, int m
    * Applies the supplied mapping function to the amount of candy.
    * IMPORTANT: this method performs no consistency checks for [maxCapacity]!
    *
-   * @param type the [CandyType] to be mapped.
+   * @param type   the [CandyType] to be mapped.
    * @param mapper the mapping function to be applied to the candy amount.
    * @return a new [Player] with the mapped candy amount.
    */
