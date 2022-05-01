@@ -25,7 +25,7 @@ public class GameController implements GameAPI {
       new City("Stuttgart", new Point(48, 9), 1000, 155)
   ).toMap(city -> new Tuple2<>(city.name(), city));
 
-  private static final int MAX_NUM_OF_DAYS = 5;
+  private static final int MAX_NUM_OF_DAYS = 30;
 
   private static final Predicate<Integer> END_CONDITION = (ref) -> ref >= MAX_NUM_OF_DAYS;
 
