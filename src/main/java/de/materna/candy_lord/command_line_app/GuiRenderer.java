@@ -11,7 +11,7 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 public class GuiRenderer {
-  public static String render(StateDTO state, Map<String, Integer> candyIndices, Map<String, Integer> cityIndices, Set<String> candyNames) {
+  public static String render(StateDTO state, Map<String, Integer> candyIndices, Map<String, Integer> cityIndices) {
     PlayerDTO player = state.player();
     CityDTO city = state.city();
 

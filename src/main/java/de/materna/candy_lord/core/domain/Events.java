@@ -7,6 +7,7 @@ import io.vavr.control.Option;
 import java.util.Random;
 
 public class Events {
+  private Events() {}
 
   private static final int MAX_GIFT_AMOUNT = 500_000;
 
@@ -48,8 +49,6 @@ public class Events {
 
   public static Tuple2<Option<String>, Player> giftCandy(Random rng, Player player) {
     return player.candies().minBy(Tuple2::_2).map(entry -> {
-          System.out.println(entry);
-          System.out.println(player.remainingCapacity());
           int amount = Math.min(rng.nextInt(entry._2, player.maxCapacity()), player.remainingCapacity());
           return amount > 0
               ?

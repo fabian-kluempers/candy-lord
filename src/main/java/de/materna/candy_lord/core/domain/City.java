@@ -49,6 +49,6 @@ public record City(String name, Map<CandyType, Integer> candyPrices, Point coord
   }
 
   public static Map<CandyType, Double> generateRandomScalars(Random rng) {
-    return List.of(CandyType.values()).toMap((x) -> new Tuple2<>(x, rng.nextDouble() * 0.4 + 1));
+    return List.of(CandyType.values()).toMap(x -> new Tuple2<>(x, rng.nextDouble() * 0.4 + 1));
   }
 }

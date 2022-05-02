@@ -27,7 +27,7 @@ public class GameController implements GameAPI {
 
   private static final int MAX_NUM_OF_DAYS = 30;
 
-  private static final Predicate<Integer> END_CONDITION = (ref) -> ref >= MAX_NUM_OF_DAYS;
+  private static final Predicate<Integer> END_CONDITION = ref -> ref >= MAX_NUM_OF_DAYS;
 
   private List<GameState> history;
 
@@ -70,7 +70,7 @@ public class GameController implements GameAPI {
         .filterNot(List::isEmpty)
         .peek(tail -> history = tail)
         .toEither("You can't undo right now! Perform an Action first!")
-        .flatMap(history -> state())
+        .flatMap(tail -> state())
         .map(StateMapper::map);
   }
 

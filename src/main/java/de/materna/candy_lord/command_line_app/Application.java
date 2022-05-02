@@ -17,7 +17,7 @@ public class Application {
         playRound(game, scanner, io);
       } else if (input.equalsIgnoreCase("N")) {
         System.out.println("Goodbye!");
-        System.exit(0);
+        break;
       }
     }
   }

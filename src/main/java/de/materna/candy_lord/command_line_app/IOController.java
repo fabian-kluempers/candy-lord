@@ -5,6 +5,7 @@ import de.materna.candy_lord.core.dto.StateDTO;
 import de.materna.candy_lord.util.TupleUtil;
 import io.vavr.*;
 import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
@@ -18,25 +19,24 @@ public class IOController {
 
   public IOController(GameAPI game) {
     this.game = game;
-    var cityToIndex = game.getCityNames().toList()
+    Map<String, Integer> cityToIndex = game.getCityNames().toList()
         .sortBy(String::length)
         .reverse()
         .zipWithIndex()
         .toMap(entry -> entry.map2(x -> x + 1));
-    var candyToIndex = game.getCandyNames().toList()
+    Map<String, Integer> candyToIndex = game.getCandyNames().toList()
         .sortBy(String::length)
         .reverse()
         .zipWithIndex()
         .toMap(entry -> entry.map2(x -> x + 1));
-    this.render = Function4.of(GuiRenderer::render)
+    render = Function3.of(GuiRenderer::render)
         .reversed()
         .apply(
-            game.getCandyNames(),
             cityToIndex,
             candyToIndex
         );
-    this.IndexToCity = cityToIndex.toMap(TupleUtil::flip);
-    this.IndexToCandy = candyToIndex.toMap(TupleUtil::flip);
+    IndexToCity = cityToIndex.toMap(TupleUtil::flip);
+    IndexToCandy = candyToIndex.toMap(TupleUtil::flip);
   }
 
 
@@ -71,10 +71,10 @@ public class IOController {
   }
 
   private String buy(String input) {
-    var args = input.split("\s+", 3);
-    var validation =
-        validateMapIndex(args[1], IndexToCandy).combine(validateInt(args[2]))
-            .ap((index, amount) -> game.buyCandy(IndexToCandy.get(index).get(), amount));
+    String[] args = input.split("\s+", 3);
+    Validation<Seq<String>, Either<String, StateDTO>> validation = validateMapIndex(args[1], IndexToCandy)
+        .combine(validateInt(args[2]))
+        .ap((index, amount) -> game.buyCandy(IndexToCandy.get(index).get(), amount));
 
     if (validation.isValid()) {
       Either<String, StateDTO> result = validation.get();
@@ -85,8 +85,8 @@ public class IOController {
   }
 
   private String sell(String input) {
-    var args = input.split("\s+", 3);
-    var validation = validateMapIndex(args[1], IndexToCandy)
+    String[] args = input.split("\s+", 3);
+    Validation<Seq<String>, Either<String, StateDTO>> validation = validateMapIndex(args[1], IndexToCandy)
         .combine(validateInt(args[2]))
         .ap((index, amount) -> game.sellCandy(IndexToCandy.get(index).get(), amount));
 
@@ -99,7 +99,10 @@ public class IOController {
   }
 
   private static Validation<String, Integer> validateInt(String arg) {
-    return Validation.fromEither(Try.of(() -> Integer.parseInt(arg)).toEither("Please supply a valid number as the second Argument!"));
+    return Validation
+        .fromEither(Try.of(() ->
+            Integer.parseInt(arg)).toEither("Please supply a valid number as the second Argument!")
+        );
   }
 
   private static Validation<String, Integer> validateMapIndex(String arg, Map<Integer, ?> map) {
@@ -107,7 +110,9 @@ public class IOController {
         .toEither("Please supply a valid number as the first argument!")
         .flatMap(x -> map.containsKey(x)
             ? Either.right(x)
-            : Either.left("Please supply a number that is in " + map.keySet().toList().sorted() + " as the first argument!")
+            : Either.left(
+                "Please supply a number that is in " + map.keySet().toList().sorted() + " as the first argument!"
+            )
         )
     );
   }
